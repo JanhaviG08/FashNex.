@@ -1,0 +1,8 @@
+venv/
+node_modules/
+.env
+dist/
+build/
+*.csv
+*.pkl
+*.h5
