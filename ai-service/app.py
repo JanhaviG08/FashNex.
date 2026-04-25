@@ -1,19 +1,15 @@
 """
 app.py — FashNex AI Service  (UPDATED)
 =======================================
-Port change: 8000 → 5001
-Reason: Node backend already runs on port 8000 (Backend/.env: PORT=8000).
-        Running both on 8000 causes EADDRINUSE errors.
+Changes vs previous version:
+  - Registers new router: routes/weather_recommend.py
+  - All existing routers (recommend, invalidate, health) unchanged
 
-Startup:
+Port: 5001  (Node backend is on 8000)
+
+Run:
   uvicorn app:app --host 0.0.0.0 --port 5001 --reload
-  OR:  python app.py
-
-Endpoints:
-  POST /recommend   — ML outfit recommendations (wardrobe items in, outfits out)
-  POST /invalidate  — Drop cached model for a user
-  GET  /health      — Service health check
-  GET  /docs        — Swagger UI
+  OR: python app.py
 """
 
 import logging
@@ -21,7 +17,8 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes.recommend import router as recommend_router
+from routes.recommend          import router as recommend_router
+from routes.weather_recommend  import router as weather_recommend_router   # ← NEW
 
 logging.basicConfig(
     level=logging.INFO,
@@ -32,17 +29,16 @@ logger = logging.getLogger('fashnex-ai')
 
 app = FastAPI(
     title='FashNex AI Service',
-    description='ML outfit recommendation engine. Called by Node backend on port 8000.',
-    version='2.0.0',
+    description='ML outfit recommendation + weather-aware product ranking.',
+    version='3.0.0',
     docs_url='/docs',
     redoc_url='/redoc',
 )
 
-# ── CORS — allow the Node backend (8000) and React dev server (5173/5174) ─────
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        'http://localhost:8000',   # Node.js backend (calls /recommend)
+        'http://localhost:8000',   # Node.js backend
         'http://localhost:5173',   # React Vite dev server
         'http://localhost:5174',
         'http://127.0.0.1:8000',
@@ -53,19 +49,21 @@ app.add_middleware(
     allow_headers=['*'],
 )
 
-app.include_router(recommend_router, prefix='', tags=['Recommendations'])
+# ── Routers ───────────────────────────────────────────────────────────────────
+app.include_router(recommend_router,        prefix='',         tags=['Wardrobe Outfits'])
+app.include_router(weather_recommend_router, prefix='',        tags=['Weather Recommendations'])  # ← NEW
 
 @app.get('/', tags=['Root'])
 async def root():
     return {
-        'service':  'FashNex AI',
-        'version':  '2.0.0',
-        'port':     5001,
+        'service': 'FashNex AI', 'version': '3.0.0', 'port': 5001,
         'endpoints': {
-            'POST /recommend':  'ML-ranked outfit combinations (called by Node)',
-            'POST /invalidate': 'Invalidate model cache for a user',
-            'GET  /health':     'Service status',
-            'GET  /docs':       'Swagger UI',
+            'POST /recommend':               'ML wardrobe outfit recommendations',
+            'POST /recommend/weather':       'Weather-aware product ranking (NEW)',
+            'GET  /recommend/weather/profile': 'Weather profile + style tips (NEW)',
+            'POST /invalidate':              'Invalidate model cache',
+            'GET  /health':                  'Service health',
+            'GET  /docs':                    'Swagger UI',
         }
     }
 

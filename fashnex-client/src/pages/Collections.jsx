@@ -1,8 +1,9 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { ShopDataContext } from '../context/ShopContext'
 import { useNavigate } from 'react-router-dom'
-import { FiFilter, FiX, FiChevronDown, FiChevronUp, FiHeart } from 'react-icons/fi'
+import { FiFilter, FiX, FiChevronDown, FiChevronUp } from 'react-icons/fi'
 import { FaStar, FaStarHalfAlt } from 'react-icons/fa'
+import HeartButton from '../component/HeartButton'
 
 // ── Custom checkbox ──────────────────────────────────────────────────────────
 function FilterCheckbox({ label, value, checked, onChange }) {
@@ -50,8 +51,6 @@ function FilterSection({ title, children }) {
 
 // ── Product card ─────────────────────────────────────────────────────────────
 function CollectionCard({ item, currency, navigate }) {
-  const [wishlisted, setWishlisted] = useState(false)
-
   return (
     <div
       onClick={() => navigate(`/productdetail/${item._id}`)}
@@ -83,14 +82,8 @@ function CollectionCard({ item, currency, navigate }) {
           )}
         </div>
 
-        {/* Top-right: ONLY wishlist heart — no star icon here */}
-        <button
-          onClick={e => { e.stopPropagation(); setWishlisted(!wishlisted) }}
-          className={`absolute top-3 right-3 w-8 h-8 rounded-full border flex items-center justify-center shadow-md transition-all duration-200
-            ${wishlisted ? 'bg-pink-500 border-pink-400 text-white' : 'bg-white border-pink-100 text-gray-400 hover:text-pink-400 hover:border-pink-300'}`}
-        >
-          <FiHeart size={13} className={wishlisted ? 'fill-white' : ''} />
-        </button>
+        {/* Top-right: ONLY wishlist heart — wired to global WishlistContext */}
+        <HeartButton productId={item._id} size="sm" variant="overlay" />
 
         {/* Quick view */}
         <div

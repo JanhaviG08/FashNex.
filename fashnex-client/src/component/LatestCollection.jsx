@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { ShopDataContext } from '../context/ShopContext'
 import { useNavigate } from 'react-router-dom'
 import { FaStar, FaStarHalfAlt } from 'react-icons/fa'
-import { FiHeart } from 'react-icons/fi'
+import HeartButton from './HeartButton'
 
 function LatestCollection() {
   const { products, currency } = useContext(ShopDataContext)
@@ -69,8 +69,6 @@ function LatestCollection() {
 
 // ── Shared card used by both Latest & BestSeller ──────────────────────────────
 export function ProductCard({ item, currency, navigate, badge }) {
-  const [wishlisted, setWishlisted] = useState(false)
-
   return (
     <div
       onClick={() => navigate(`/productdetail/${item._id}`)}
@@ -98,14 +96,8 @@ export function ProductCard({ item, currency, navigate, badge }) {
           </span>
         )}
 
-        {/* Wishlist */}
-        <button
-          onClick={(e) => { e.stopPropagation(); setWishlisted(!wishlisted) }}
-          className={`absolute top-3 right-3 w-8 h-8 rounded-full backdrop-blur-md border flex items-center justify-center shadow-sm transition-all duration-200
-            ${wishlisted ? 'bg-pink-500 border-pink-400 text-white' : 'bg-white/70 border-white/60 text-gray-400 hover:text-pink-400'}`}
-        >
-          <FiHeart size={13} className={wishlisted ? 'fill-white' : ''} />
-        </button>
+        {/* Wishlist — real global state via WishlistContext */}
+        <HeartButton productId={item._id} size="sm" variant="overlay" />
 
         {/* Quick view */}
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-md text-pink-500 text-xs font-semibold px-4 py-1.5 rounded-full whitespace-nowrap opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">

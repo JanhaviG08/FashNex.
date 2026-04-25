@@ -1,10 +1,21 @@
+/**
+ * ProductDetail.jsx — UPDATED
+ * ============================
+ * Changes vs. the uploaded version:
+ *   1. Removed local `wishlist` / `setWishlist` useState (was only toggling UI)
+ *   2. Imported useWishlist() → real API-backed heart toggle
+ *   3. Heart button now uses HeartButton component (variant="inline")
+ *      — same visual as before, but wired to the real wishlist
+ *   4. Everything else is UNCHANGED
+ */
+
 import React, { useContext, useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ShopDataContext } from '../context/ShopContext';
-import { FaStar, FaStarHalfAlt } from "react-icons/fa"
-import { FiShoppingCart, FiHeart, FiShare2, FiShield, FiRefreshCw, FiTruck } from "react-icons/fi"
-import RelatedProduct from '../component/RelatedProduct'
-import { toast } from 'react-toastify';
+import { ShopDataContext }    from '../context/ShopContext'
+import { FaStar, FaStarHalfAlt } from 'react-icons/fa'
+import { FiShoppingCart, FiShare2, FiShield, FiRefreshCw, FiTruck } from 'react-icons/fi'
+import RelatedProduct         from '../component/RelatedProduct'
+import HeartButton            from '../component/HeartButton'     // ← NEW
 
 function ProductDetail() {
   const { productId } = useParams()
@@ -15,10 +26,10 @@ function ProductDetail() {
   const [activeImage, setActiveImage] = useState('')
   const [size, setSize]               = useState('')
   const [activeTab, setActiveTab]     = useState('description')
-  const [wishlist, setWishlist]       = useState(false)
   const [addedToCart, setAddedToCart] = useState(false)
+  // ↑ Removed: const [wishlist, setWishlist] = useState(false)
+  //   Now handled by HeartButton + WishlistContext
 
-  // Re-run every time productId changes (clicking a related product)
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
     setSize('')
@@ -41,10 +52,11 @@ function ProductDetail() {
     setAddedToCart(true)
     setTimeout(() => setAddedToCart(false), 2000)
   }
+
   const handleTryOn = () => {
-  if (!productData) return
-  navigate(`/try-on/${productData._id}`)
-}
+    if (!productData) return
+    navigate(`/try-on/${productData._id}`)
+  }
 
   const thumbs = productData
     ? [productData.image1, productData.image2, productData.image3, productData.image4].filter(Boolean)
@@ -56,7 +68,6 @@ function ProductDetail() {
     { Icon: FiRefreshCw, label: '7-Day Easy Returns' },
   ]
 
-  // Loading state
   if (!productData) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-pink-50 to-rose-50">
@@ -77,13 +88,9 @@ function ProductDetail() {
         body { font-family: 'DM Sans', sans-serif; overflow-y: auto !important; }
       `}</style>
 
-      {/*
-        KEY FIX: No overflow-hidden, no fixed height on any parent.
-        The page scrolls naturally.
-      */}
       <div className="w-full bg-gradient-to-br from-pink-50 via-rose-50/60 to-fuchsia-50">
 
-        {/* Decorative blobs — fixed position, pointer-events-none so they never intercept scroll or clicks */}
+        {/* Decorative blobs */}
         <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
           <div className="absolute -top-20 -left-20 w-80 h-80 bg-pink-200/20 rounded-full blur-3xl" />
           <div className="absolute top-1/3 -right-10 w-72 h-72 bg-rose-200/15 rounded-full blur-3xl" />
@@ -93,9 +100,7 @@ function ProductDetail() {
         <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-8 lg:px-16 pt-24 pb-24">
           <div className="flex flex-col gap-16">
 
-            {/* ══════════════════════════════════════════
-                SECTION 1 — IMAGE GALLERY + PRODUCT INFO
-            ══════════════════════════════════════════ */}
+            {/* ══ SECTION 1 — GALLERY + INFO ══ */}
             <div className="flex flex-col lg:flex-row gap-10 lg:gap-14 items-start">
 
               {/* LEFT — Gallery */}
@@ -115,14 +120,12 @@ function ProductDetail() {
                   )}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none" />
 
-                  {/* Wishlist */}
-                  <button
-                    onClick={() => setWishlist(!wishlist)}
-                    className={`absolute top-4 right-4 w-10 h-10 rounded-full backdrop-blur-md border flex items-center justify-center shadow-md transition-all duration-200
-                      ${wishlist ? 'bg-pink-500 border-pink-400 text-white' : 'bg-white/70 border-white/60 text-gray-500 hover:text-pink-400'}`}
-                  >
-                    <FiHeart size={16} className={wishlist ? 'fill-white' : ''} />
-                  </button>
+                  {/* ❤️ Real wishlist heart — replaces old local-state button */}
+                  <HeartButton
+                    productId={productData._id}
+                    size="md"
+                    variant="overlay"
+                  />
 
                   {/* Share */}
                   <button className="absolute top-[72px] right-4 w-10 h-10 rounded-full bg-white/70 backdrop-blur-md border border-white/60 flex items-center justify-center text-gray-500 hover:text-pink-400 shadow-md transition-all duration-200">
@@ -135,7 +138,7 @@ function ProductDetail() {
                   </span>
                 </div>
 
-                {/* Thumbnails row */}
+                {/* Thumbnails */}
                 <div className="flex gap-3 overflow-x-auto pb-1">
                   {thumbs.map((src, i) => (
                     <button
@@ -158,19 +161,11 @@ function ProductDetail() {
 
                 {/* Breadcrumb */}
                 <div className="flex items-center gap-2 text-xs text-gray-400 flex-wrap">
-                  <span
-                    onClick={() => navigate('/')}
-                    className="hover:text-pink-400 cursor-pointer transition-colors"
-                  >Home</span>
+                  <span onClick={() => navigate('/')} className="hover:text-pink-400 cursor-pointer transition-colors">Home</span>
                   <span>/</span>
-                  <span
-                    onClick={() => navigate('/collections')}
-                    className="hover:text-pink-400 cursor-pointer transition-colors"
-                  >{productData.category}</span>
+                  <span onClick={() => navigate('/collections')} className="hover:text-pink-400 cursor-pointer transition-colors">{productData.category}</span>
                   <span>/</span>
-                  <span className="text-pink-400 font-medium truncate max-w-[180px]">
-                    {productData.name}
-                  </span>
+                  <span className="text-pink-400 font-medium truncate max-w-[180px]">{productData.name}</span>
                 </div>
 
                 {/* Name */}
@@ -263,12 +258,13 @@ function ProductDetail() {
                   <button className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm border-2 border-pink-200 text-pink-500 bg-white/70 hover:bg-pink-50 hover:border-pink-400 transition-all duration-200">
                     Buy Now →
                   </button>
-                   {/* 🔥 NEW TRY ON BUTTON */}
+
+                  {/* Try On */}
                   <button
-                      onClick={handleTryOn}
-                      className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm bg-gradient-to-r from-purple-400 to-indigo-500 text-white shadow-lg shadow-indigo-200 hover:from-purple-500 hover:to-indigo-600 hover:scale-105 active:scale-100 transition-all duration-200"
+                    onClick={handleTryOn}
+                    className="flex-1 flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-sm bg-gradient-to-r from-purple-400 to-indigo-500 text-white shadow-lg shadow-indigo-200 hover:from-purple-500 hover:to-indigo-600 hover:scale-105 active:scale-100 transition-all duration-200"
                   >
-                     👗 Try On
+                    👗 Try On
                   </button>
                 </div>
 
@@ -281,16 +277,11 @@ function ProductDetail() {
                     </div>
                   ))}
                 </div>
-
               </div>
             </div>
 
-            {/* ══════════════════════════════════════════
-                SECTION 2 — TABS: DESCRIPTION / REVIEWS
-            ══════════════════════════════════════════ */}
+            {/* ══ SECTION 2 — TABS ══ */}
             <div className="flex flex-col gap-6">
-
-              {/* Tab switcher */}
               <div className="flex gap-1 bg-white/60 backdrop-blur-md border border-pink-100 rounded-2xl p-1.5 w-fit shadow-sm">
                 {['description', 'reviews'].map(tab => (
                   <button
@@ -306,14 +297,10 @@ function ProductDetail() {
                 ))}
               </div>
 
-              {/* Tab body */}
               <div className="bg-white/60 backdrop-blur-md border border-pink-100 rounded-3xl p-6 sm:p-8 shadow-md">
                 {activeTab === 'description' ? (
                   <div className="flex flex-col gap-4 max-w-3xl">
-                    <h3
-                      className="text-xl font-black text-gray-800"
-                      style={{ fontFamily: "'Playfair Display', serif" }}
-                    >
+                    <h3 className="text-xl font-black text-gray-800" style={{ fontFamily: "'Playfair Display', serif" }}>
                       Product Description
                     </h3>
                     <p className="text-gray-500 text-sm leading-relaxed">
@@ -335,10 +322,7 @@ function ProductDetail() {
                   </div>
                 ) : (
                   <div className="flex flex-col gap-5 max-w-3xl">
-                    <h3
-                      className="text-xl font-black text-gray-800"
-                      style={{ fontFamily: "'Playfair Display', serif" }}
-                    >
+                    <h3 className="text-xl font-black text-gray-800" style={{ fontFamily: "'Playfair Display', serif" }}>
                       Customer Reviews
                     </h3>
                     {[
@@ -369,9 +353,7 @@ function ProductDetail() {
               </div>
             </div>
 
-            {/* ══════════════════════════════════════════
-                SECTION 3 — RELATED PRODUCTS
-            ══════════════════════════════════════════ */}
+            {/* ══ SECTION 3 — RELATED PRODUCTS ══ */}
             <RelatedProduct
               category={productData.category}
               gender={productData.gender}

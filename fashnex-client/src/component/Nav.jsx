@@ -5,6 +5,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { UserDataContext } from '../context/UserContext';
 import { AuthDataContext } from '../context/authContext';
 import { ShopDataContext } from '../context/ShopContext';
+import { useWishlist }     from '../context/WishlistContext';
+import {Sparkles} from 'lucide-react';
 
 // ── Icons (inline SVG to avoid react-icons bundle issues) ──
 const SearchIcon   = ({ solid }) => solid
@@ -25,6 +27,12 @@ const UserIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor
 
 const CloseIcon = () => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-4 h-4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>;
 
+const HeartIcon = ({ filled }) => (
+  <svg viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+);
+
 // ── Nav links config ──
 const navLinks = [
   { label: "Home",        path: "/",           icon: <HomeIcon /> },
@@ -38,6 +46,7 @@ function Nav() {
   const { getCurrentUser, userData } = useContext(UserDataContext);
   const { serverUrl } = useContext(AuthDataContext);
   const { showSearch, setShowSearch, search, setSearch, getCartCount } = useContext(ShopDataContext);
+  const { wishlistCount } = useWishlist();
 
   const [showProfile, setShowProfile] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -70,6 +79,14 @@ function Nav() {
       navigate("/");
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleWishlistClick = () => {
+    if (!userData) {
+      navigate("/login");
+    } else {
+      navigate("/wishlist");
     }
   };
 
@@ -134,8 +151,8 @@ function Nav() {
             className="flex items-center gap-2.5 cursor-pointer shrink-0"
             onClick={() => navigate("/")}
           >
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shadow-md shadow-pink-200 overflow-hidden">
-              <img src={Logo} alt="FashNex" className="w-7 h-7 object-contain" />
+            <div className="w-9 h-9 flex items-center justify-center overflow-hidden">
+              <Sparkles size={18}  className="w-7 h-7 object-contain text-pink-500" />
             </div>
             <span
               className="text-[22px] font-black text-gray-800 leading-none hidden sm:block"
@@ -151,7 +168,7 @@ function Nav() {
               <li key={label}>
                 <button
                   onClick={() => navigate(path)}
-                  className={`nav-link-underline ${isActive(path) ? 'nav-link-active' : ''} px-4 py-2 text-[13px] font-semibold tracking-wide transition-colors duration-200
+                  className={`nav-link-underline cursor-pointer ${isActive(path) ? 'nav-link-active' : ''} px-4 py-2 text-[13px] font-semibold tracking-wide transition-colors duration-200
                     ${isActive(path) ? 'text-pink-500' : 'text-gray-600 hover:text-pink-500'}`}
                 >
                   {label}
@@ -163,7 +180,7 @@ function Nav() {
             <li className="ml-2">
               <button
                 onClick={() => navigate("/recommend")}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold transition-all duration-200 border
+                className={`flex items-center cursor-pointer gap-1.5 px-4 py-2 rounded-full text-[13px] font-semibold transition-all duration-200 border
                   ${isActive("/recommend")
                     ? 'bg-gradient-to-r from-pink-400 to-rose-400 text-white border-transparent shadow-md shadow-pink-200'
                     : 'bg-pink-50 text-pink-500 border-pink-200 hover:bg-gradient-to-r hover:from-pink-400 hover:to-rose-400 hover:text-white hover:border-transparent hover:shadow-md hover:shadow-pink-200'
@@ -181,7 +198,7 @@ function Nav() {
             {/* Search toggle */}
             <button
               onClick={() => { setShowSearch(prev => !prev); if (!showSearch) navigate("/collection"); }}
-              className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200
+              className={`w-9 h-9 rounded-xl cursor-pointer flex items-center justify-center transition-all duration-200
                 ${showSearch
                   ? 'bg-pink-100 text-pink-500'
                   : 'text-gray-500 hover:bg-pink-50 hover:text-pink-500'}`}
@@ -192,7 +209,7 @@ function Nav() {
             {/* Cart — desktop only */}
             <button
               onClick={() => navigate("/cart")}
-              className="relative w-9 h-9 rounded-xl text-gray-500 hover:bg-pink-50 hover:text-pink-500 transition-all duration-200 items-center justify-center hidden md:flex"
+              className="relative w-9 h-9 cursor-pointer rounded-xl text-gray-500 hover:bg-pink-50 hover:text-pink-500 transition-all duration-200 items-center justify-center hidden md:flex"
             >
               <CartIcon />
               <span className="absolute -top-0.5 -right-0.5 w-4 h-4 bg-gradient-to-br from-pink-400 to-rose-500 text-white text-[9px] font-bold rounded-full flex items-center justify-center shadow-sm">
@@ -200,11 +217,23 @@ function Nav() {
               </span>
             </button>
 
+            {/* ── Wishlist — desktop only ── */}
+            <button
+              onClick={handleWishlistClick}
+              title="My Wishlist"
+              className={`relative w-9 h-9 cursor-pointer rounded-xl items-center justify-center transition-all duration-200 hidden md:flex
+                ${isActive('/wishlist')
+                  ? 'bg-pink-100 text-pink-500'
+                  : 'text-gray-500 hover:bg-pink-50 hover:text-pink-500'}`}
+            >
+              <HeartIcon filled={isActive('/wishlist')} />
+            </button>
+
             {/* Profile */}
             <div className="relative" ref={profileRef}>
               <button
                 onClick={() => setShowProfile(prev => !prev)}
-                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-200 font-bold text-sm
+                className={`w-9 h-9 cursor-pointer rounded-xl flex items-center justify-center transition-all duration-200 font-bold text-sm
                   ${userData
                     ? 'bg-gradient-to-br from-pink-400 to-rose-500 text-white shadow-md shadow-pink-200'
                     : 'text-gray-500 hover:bg-pink-50 hover:text-pink-500'}`}
@@ -342,7 +371,7 @@ function Nav() {
           {/* Style AI — highlighted */}
           <button
             onClick={() => navigate("/recommend")}
-            className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-[10px] font-bold
+            className={`flex flex-col cursor-pointer items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-[10px] font-bold
               ${isActive("/recommend")
                 ? 'text-pink-500 bg-pink-50'
                 : 'text-pink-400 hover:text-pink-500'}`}
@@ -351,16 +380,30 @@ function Nav() {
             Style AI
           </button>
 
+          {/* ── Wishlist — mobile bottom bar ── */}
+          <button
+            onClick={handleWishlistClick}
+            className={`relative flex flex-col cursor-pointer items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-[10px] font-semibold
+              ${isActive('/wishlist')
+                ? 'text-pink-500 bg-pink-50'
+                : 'text-gray-400 hover:text-pink-400'}`}
+          >
+            <span className={isActive('/wishlist') ? 'text-pink-500' : ''}>
+              <HeartIcon filled={isActive('/wishlist')} />
+            </span>
+            Wishlist
+          </button>
+
           {/* Cart with badge */}
           <button
             onClick={() => navigate("/cart")}
-            className={`relative flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-[10px] font-semibold
+            className={`relative flex cursor-pointer flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-[10px] font-semibold
               ${isActive("/cart")
                 ? 'text-pink-500 bg-pink-50'
                 : 'text-gray-400 hover:text-pink-400'}`}
           >
             <CartIcon />
-            <span className="absolute -top-0 right-1.5 w-3.5 h-3.5 bg-gradient-to-br from-pink-400 to-rose-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center">
+            <span className="absolute -top-0 right-1.5 w-3.5 h-3.5 cursor-pointer bg-gradient-to-br from-pink-400 to-rose-500 text-white text-[8px] font-bold rounded-full flex items-center justify-center">
               {getCartCount()}
             </span>
             Cart

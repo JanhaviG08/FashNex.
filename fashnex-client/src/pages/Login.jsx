@@ -9,6 +9,7 @@ import { signInWithPopup } from 'firebase/auth'
 import { auth, provider } from '../../utils/Firebase'
 import { AuthDataContext } from '../context/authContext.jsx'
 import { UserDataContext } from '../context/UserContext.jsx'
+import { Sparkles } from 'lucide-react'
 
 function Login() {
   const [show,     setShow]     = useState(false)
@@ -72,7 +73,9 @@ function Login() {
             className="flex items-center justify-center gap-3 mb-8 cursor-pointer group"
             onClick={() => navigate('/')}
           >
-            <img src={Logo} alt="FashNex" className="w-12 h-12 object-contain" />
+            <div className="w-9 h-9 flex items-center justify-center overflow-hidden">
+              <Sparkles size={18}  className="w-7 h-7 object-contain text-pink-500" />
+            </div>
             <span
               className="text-3xl font-black bg-gradient-to-r from-pink-500 to-rose-500 bg-clip-text text-transparent"
               style={{ fontFamily: "'Playfair Display', serif" }}

@@ -13,6 +13,7 @@ import cartRoutes from "./routes/cartRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
 import weatherRoutes  from './routes/weatherRoutes.js'
 import wardrobeRoutes from './routes/wardrobeRoutes.js'
+import wishlistRoutes from './routes/wishlistRoutes.js'   
 
 dotenv.config();
  
@@ -35,7 +36,7 @@ app.use("/api/order", orderRoutes);
 app.use('/api/weather',         weatherRoutes)
 app.use('/api/recommendations', weatherRoutes)   // same router handles /recommendations/weather
 app.use('/api/wardrobe',        wardrobeRoutes)
-
+app.use('/api/wishlist',        wishlistRoutes)   
 
 // Connect DB FIRST
 await connectDb();

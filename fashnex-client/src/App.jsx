@@ -20,6 +20,8 @@ import NotFound from "./pages/NotFound";
 import { WardrobeProvider } from './context/WardrobeContext'
 import Wardrobe from './pages/Wardrobe'
 import TryOn from "./pages/TryOn"
+import Wishlist from "./pages/Wishlist";
+import { WishlistProvider } from "./context/WishlistContext"
 
 function App() {
   let {userData} = useContext(UserDataContext)
@@ -96,6 +98,11 @@ function App() {
              path="/order" 
              element={userData ? <Order /> : <Navigate to="/login" state={{from: location.pathname}}/>} 
         />
+
+        <Route
+            path="/wishlist"
+            element={userData ? <Wishlist /> : <Navigate to="/login" state={{ from: '/wishlist' }} />}
+          />
 
         <Route 
              path="*"
