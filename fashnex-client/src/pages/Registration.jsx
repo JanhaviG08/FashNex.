@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react'
 import Logo from '../assets/logo1.png'
 import Google from '../assets/google.png'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { IoIosEye, IoIosEyeOff } from 'react-icons/io'
 import { FiUser, FiMail, FiLock, FiArrowRight } from 'react-icons/fi'
 import axios from 'axios'
@@ -22,6 +22,9 @@ function Registration() {
   const { serverUrl }      = useContext(AuthDataContext)
   const { getCurrentUser } = useContext(UserDataContext)
   const navigate           = useNavigate()
+  const location            = useLocation()
+
+  const redirectTo = location.state?.from || '/'
 
   const handleSignup = async (e) => {
     e.preventDefault()
@@ -29,7 +32,7 @@ function Registration() {
     try {
       await axios.post(serverUrl + '/api/auth/registration', { name, email, password }, { withCredentials: true })
       await getCurrentUser()
-      navigate('/')
+      navigate(redirectTo, { replace: true })
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed. Please try again.')
     } finally {
@@ -44,7 +47,7 @@ function Registration() {
       const { displayName: gName, email: gEmail } = response.user
       await axios.post(serverUrl + '/api/auth/googlelogin', { name: gName, email: gEmail }, { withCredentials: true })
       await getCurrentUser()
-      navigate('/')
+      navigate(redirectTo, { replace: true })
     } catch (err) {
       setError('Google sign-up failed. Please try again.')
     }
@@ -202,7 +205,7 @@ function Registration() {
             <p className="text-center text-sm text-gray-500">
               Already have an account?{' '}
               <button
-                onClick={() => navigate('/login')}
+                onClick={() => navigate('/login', { state: { from: redirectTo } })}
                 className="text-pink-500 font-bold hover:text-rose-500 transition-colors cursor-pointer"
               >
                 Login

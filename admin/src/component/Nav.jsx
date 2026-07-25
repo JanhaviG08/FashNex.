@@ -5,6 +5,8 @@ import axios from 'axios'
 import { authDataContext } from '../context/AuthContext'
 import { adminDataContext } from '../context/AdminContext'
 import { FiLogOut } from 'react-icons/fi'
+import {Sparkles} from 'lucide-react';
+
 
 function Nav() {
   const navigate      = useNavigate()
@@ -28,9 +30,9 @@ function Nav() {
 
         {/* Logo */}
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate('/')}>
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center shadow-md shadow-pink-900/40 overflow-hidden">
-            <img src={Logo} alt="FashNex" className="w-6 h-6 object-contain" />
-          </div>
+          <div className="w-9 h-9 flex items-center justify-center overflow-hidden">
+              <Sparkles size={18}  className="w-7 h-7 object-contain text-pink-500" />
+            </div>
           <span className="text-lg font-black text-white" style={{ fontFamily: "'Playfair Display', serif" }}>
             Fash<span className="text-pink-400">Nex</span>
             <span className="ml-2 text-[10px] font-semibold uppercase tracking-widest text-pink-400/70 align-middle">Admin</span>

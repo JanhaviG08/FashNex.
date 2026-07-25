@@ -4,6 +4,7 @@ import Sidebar from '../component/Sidebar'
 import { authDataContext } from '../context/AuthContext'
 import axios from 'axios'
 import { FiPackage, FiShoppingBag, FiTrendingUp, FiUsers } from 'react-icons/fi'
+import { Sparkles } from 'lucide-react';
 
 function Home() {
   const [totalProducts, setTotalProducts] = useState(null)

@@ -18,7 +18,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes.recommend          import router as recommend_router
-from routes.weather_recommend  import router as weather_recommend_router   # ← NEW
+from routes.weather_recommend  import router as weather_recommend_router  
+from routes.tryon import router as tryon_router
 
 logging.basicConfig(
     level=logging.INFO,
@@ -51,7 +52,8 @@ app.add_middleware(
 
 # ── Routers ───────────────────────────────────────────────────────────────────
 app.include_router(recommend_router,        prefix='',         tags=['Wardrobe Outfits'])
-app.include_router(weather_recommend_router, prefix='',        tags=['Weather Recommendations'])  # ← NEW
+app.include_router(weather_recommend_router, prefix='',        tags=['Weather Recommendations']) 
+app.include_router(tryon_router)
 
 @app.get('/', tags=['Root'])
 async def root():

@@ -7,6 +7,7 @@ export const UserDataContext = createContext();
 function UserContext({ children }) {
 
     const [userData, setUserData] = useState(null);
+    const [loading, setLoading]   = useState(true); // true until the initial session check resolves
     const { serverUrl } = useContext(AuthDataContext);
 
     const getCurrentUser = async () => {
@@ -25,13 +26,17 @@ function UserContext({ children }) {
     };
 
     useEffect(() => {
-        getCurrentUser();
+        (async () => {
+            await getCurrentUser();
+            setLoading(false); // session check done — safe for ProtectedRoute to decide now
+        })();
     }, []);
 
     const value = {
         userData,
         setUserData,
-        getCurrentUser
+        getCurrentUser,
+        loading
     };
 
     return (

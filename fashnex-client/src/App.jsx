@@ -12,7 +12,7 @@ import Contact from "./pages/Contact";
 import { UserDataContext } from "./context/UserContext";
 import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import PlaceOrder from "./pages/PlaceOrder";
 import 'react-toastify/dist/ReactToastify.css';
 import Order from "./pages/Order";
@@ -22,6 +22,8 @@ import Wardrobe from './pages/Wardrobe'
 import TryOn from "./pages/TryOn"
 import Wishlist from "./pages/Wishlist";
 import { WishlistProvider } from "./context/WishlistContext"
+import ProtectedRoute from "./component/ProtectedRoute"
+import Profile from "./pages/Profile"
 
 function App() {
   let {userData} = useContext(UserDataContext)
@@ -35,86 +37,45 @@ function App() {
       {!hideNavbar  && <Nav/>}
       <Routes>
 
-        <Route 
-           path="/login" 
+        {/* ── Auth pages — bounce back to wherever the user was headed ── */}
+        <Route
+           path="/login"
            element={
-              userData ? (<Navigate to ={location.state?.from || "/"} />) :(<Login/>)
-           } 
-        />
-
-        <Route 
-            path="/signup" 
-            element={
-              userData ? (<Navigate to ={location.state?.from || "/"} />) :(<Registration/>)
-            } 
-        />
-
-        <Route 
-            path="/" 
-            element={userData ? <Home/> : <Navigate to="/login" state={{from: location.pathname}}/>}  
-        />
-        
-        <Route 
-            path="/recommend" 
-            element={userData ? <WeatherRecommendation /> : <Navigate to="/login" state={{from: location.pathname}}/>} 
-        />
-
-        <Route 
-             path="/about" 
-             element={ userData ? <About /> : <Navigate to="/login" state={{from: location.pathname}}/>} 
-        />
-
-        <Route 
-            path="/collection" 
-            element={userData ? <Collections />: <Navigate to="/login" state={{from: location.pathname}}/>} 
-        />
-
-        <Route 
-             path="/product" 
-             element={userData ? <Product/> : <Navigate to="/login" state={{from: location.pathname}}/>} 
-        />
-
-        <Route 
-             path="/contact" 
-             element={userData ? <Contact /> : <Navigate to="/login" state={{from: location.pathname}}/>} 
-        />
-
-        <Route 
-             path="/productdetail/:productId" 
-             element={userData ? <ProductDetail /> : <Navigate to="/login" state={{from: location.pathname}}/>} 
-        />
-
-        <Route 
-             path="/cart" 
-             element={userData ? <Cart /> : <Navigate to="/login" state={{from: location.pathname}}/>} 
-        />
-
-        <Route 
-             path="/placeorder" 
-             element={userData ? <PlaceOrder /> : <Navigate to="/login" state={{from: location.pathname}}/>} 
-        />
-
-        <Route 
-             path="/order" 
-             element={userData ? <Order /> : <Navigate to="/login" state={{from: location.pathname}}/>} 
+              userData ? (<Navigate to={location.state?.from || "/"} replace/>) :(<Login/>)
+           }
         />
 
         <Route
-            path="/wishlist"
-            element={userData ? <Wishlist /> : <Navigate to="/login" state={{ from: '/wishlist' }} />}
-          />
-
-        <Route 
-             path="*"
-             element={<NotFound/>}
+            path="/signup"
+            element={
+              userData ? (<Navigate to={location.state?.from || "/"} replace/>) :(<Registration/>)
+            }
         />
 
-        <Route path="/recommend"  element={<WeatherRecommendation />} />
-        <Route path="/wardrobe"   element={<Wardrobe />} />
-        <Route path="/try-on/:productId" element={<TryOn />} />
+        {/* ── Public routes — browsing works without logging in ── */}
+        <Route path="/"                       element={<Home/>} />
+        <Route path="/about"                  element={<About />} />
+        <Route path="/collection"             element={<Collections />} />
+        <Route path="/product"                element={<Product/>} />
+        <Route path="/contact"                element={<Contact />} />
+        <Route path="/productdetail/:productId" element={<ProductDetail />} />
+        <Route path="/cart"                   element={<Cart />} />
+        <Route path="/recommend"              element={<WeatherRecommendation />} />
+        <Route path="/try-on/:productId"      element={<TryOn />} />
+
+        {/* ── Protected routes — personal features, require login ── */}
+        <Route path="/wishlist"   element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+        <Route path="/wardrobe"   element={<ProtectedRoute><Wardrobe /></ProtectedRoute>} />
+        <Route path="/placeorder" element={<ProtectedRoute><PlaceOrder /></ProtectedRoute>} />
+        <Route path="/order"      element={<ProtectedRoute><Order /></ProtectedRoute>} />
+        
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+
+        {/* ── Catch-all must stay LAST — anything after this was unreachable before ── */}
+        <Route path="*" element={<NotFound/>} />
 
       </Routes>
-      
+
      </WardrobeProvider>
     </>
   );

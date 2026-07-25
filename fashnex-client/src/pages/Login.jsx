@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react'
 import Logo from '../assets/logo1.png'
 import Google from '../assets/google.png'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { IoIosEye, IoIosEyeOff } from 'react-icons/io'
 import { FiMail, FiLock, FiArrowRight } from 'react-icons/fi'
 import axios from 'axios'
@@ -21,6 +21,11 @@ function Login() {
   const { serverUrl }          = useContext(AuthDataContext)
   const { getCurrentUser }     = useContext(UserDataContext)
   const navigate               = useNavigate()
+  const location                = useLocation()
+
+  // Wherever ProtectedRoute (or the wishlist/checkout click) sent the user
+  // from — falls back to Home if they landed on /login directly.
+  const redirectTo = location.state?.from || '/'
 
   const handleLogin = async (e) => {
     e.preventDefault()
@@ -28,7 +33,7 @@ function Login() {
     try {
       await axios.post(serverUrl + '/api/auth/login', { email, password }, { withCredentials: true })
       await getCurrentUser()
-      navigate('/')
+      navigate(redirectTo, { replace: true })
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed. Please check your credentials.')
     } finally {
@@ -43,7 +48,7 @@ function Login() {
       const { displayName: name, email } = response.user
       await axios.post(serverUrl + '/api/auth/googlelogin', { name, email }, { withCredentials: true })
       await getCurrentUser()
-      navigate('/')
+      navigate(redirectTo, { replace: true })
     } catch (err) {
       setError('Google login failed. Please try again.')
     }
@@ -184,7 +189,7 @@ function Login() {
             <p className="text-center text-sm text-gray-500">
               Don't have an account?{' '}
               <button
-                onClick={() => navigate('/signup')}
+                onClick={() => navigate('/signup', { state: { from: redirectTo } })}
                 className="text-pink-500 font-bold hover:text-rose-500 cursor-pointer transition-colors"
               >
                 Create one free

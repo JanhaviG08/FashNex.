@@ -39,7 +39,7 @@ const navLinks = [
   { label: "Collections", path: "/collection", icon: <GridIcon /> },
   { label: "About",       path: "/about",      icon: null },
   { label: "Contact",     path: "/contact",    icon: <ContactIcon /> },
-  {label: "My Wardrobe", path: "wardrobe"},
+  {label: "My Wardrobe", path: "/wardrobe"},
 ];
 
 function Nav() {
@@ -84,7 +84,7 @@ function Nav() {
 
   const handleWishlistClick = () => {
     if (!userData) {
-      navigate("/login");
+      navigate("/login", { state: { from: "/wishlist" } });
     } else {
       navigate("/wishlist");
     }
@@ -268,7 +268,7 @@ function Nav() {
                       <li>
                         <button
                           className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-500 transition-colors duration-150 font-medium"
-                          onClick={() => { navigate("login"); setShowProfile(false); }}
+                          onClick={() => { navigate("/login", { state: { from: location.pathname } }); setShowProfile(false); }}
                         >
                           🔑 Login
                         </button>
@@ -281,6 +281,16 @@ function Nav() {
                           onClick={() => { handleLogout(); setShowProfile(false); }}
                         >
                           👋 Logout
+                        </button>
+                      </li>
+                    )}
+                    {userData && (
+                      <li>
+                        <button
+                          className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-500 transition-colors duration-150 font-medium"
+                          onClick={() => { navigate("/profile"); setShowProfile(false); }}
+                        >
+                          👤 My Profile
                         </button>
                       </li>
                     )}
